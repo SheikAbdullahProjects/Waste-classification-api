@@ -12,12 +12,14 @@ from .predict import predict_image
 
 app = FastAPI(title="Garbage Classification API")
 
-allowed_origins_env = os.getenv("ALLOWED_ORIGINS", "http://localhost:5173")
+allowed_origins_env = os.getenv("ALLOWED_ORIGINS", "https://waste-classification-client.vercel.app")
+allowed_origins_regex = os.getenv("ALLOWED_ORIGINS_REGEX")
 allowed_origins = [origin.strip() for origin in allowed_origins_env.split(",") if origin.strip()]
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allowed_origins,
+    allow_origin_regex=allowed_origins_regex,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
