@@ -1,9 +1,19 @@
+import os
 from pathlib import Path
 
-ROOT_DIR = Path(__file__).resolve().parents[2]
-DATASET_DIR = ROOT_DIR / "garbage_classification"
-MODEL_DIR = ROOT_DIR / "backend" / "model_artifacts"
-MODEL_PATH = MODEL_DIR / "best_model.pt"
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+BACKEND_ROOT = Path(__file__).resolve().parents[1]
+DATASET_DIR = PROJECT_ROOT / "garbage_classification"
+
+MODEL_PATH_ENV = os.getenv("MODEL_PATH")
+if MODEL_PATH_ENV:
+	MODEL_PATH = Path(MODEL_PATH_ENV)
+else:
+	candidate_project = PROJECT_ROOT / "backend" / "model_artifacts" / "best_model.pt"
+	candidate_backend = BACKEND_ROOT / "model_artifacts" / "best_model.pt"
+	MODEL_PATH = candidate_project if candidate_project.exists() else candidate_backend
+
+MODEL_DIR = MODEL_PATH.parent
 
 IMAGE_SIZE = 224
 BATCH_SIZE = 32
