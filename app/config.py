@@ -18,12 +18,15 @@ MODEL_DIR = MODEL_PATH.parent
 IMAGE_SIZE = 224
 BATCH_SIZE = 32
 NUM_WORKERS = 0  # Windows-friendly default
-NUM_EPOCHS = 8
-LEARNING_RATE = 3e-4
+NUM_EPOCHS = 20
+LEARNING_RATE = 1e-4
 WEIGHT_DECAY = 1e-4
 VAL_SPLIT = 0.2
 RANDOM_SEED = 42
 USE_WEIGHTED_SAMPLER = True
+MODEL_NAME = "resnet50"
+FREEZE_BACKBONE_EPOCHS = 2
+LABEL_SMOOTHING = 0.1
 
 # Optional speed controls (set to None to use full dataset)
 MAX_SAMPLES = None

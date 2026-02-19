@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from PIL import Image
 import torch
 
-from .config import MODEL_PATH
+from .config import MODEL_PATH, MODEL_NAME
 from .model import load_model
 from .predict import predict_image
 
@@ -15,6 +15,13 @@ app = FastAPI(title="Garbage Classification API")
 allowed_origins_env = os.getenv("ALLOWED_ORIGINS", "https://waste-classification-client.vercel.app")
 allowed_origins_regex = os.getenv("ALLOWED_ORIGINS_REGEX")
 allowed_origins = [origin.strip() for origin in allowed_origins_env.split(",") if origin.strip()]
+
+BIODEGRADABLE_CLASSES = {"biological", "paper", "cardboard"}
+
+
+def _waste_type(label: str) -> str:
+    return "biodegradable" if label in BIODEGRADABLE_CLASSES else "non-biodegradable"
+
 
 app.add_middleware(
     CORSMiddleware,
@@ -36,7 +43,7 @@ def _load_model():
     global _model, _class_names, _model_mtime
     if not MODEL_PATH.exists():
         return
-    _model, _class_names = load_model(MODEL_PATH, _device)
+    _model, _class_names = load_model(MODEL_PATH, _device, MODEL_NAME)
     _model_mtime = MODEL_PATH.stat().st_mtime
 
 
@@ -47,7 +54,7 @@ def _ensure_model_loaded():
 
     current_mtime = MODEL_PATH.stat().st_mtime
     if _model is None or _model_mtime != current_mtime:
-        _model, _class_names = load_model(MODEL_PATH, _device)
+        _model, _class_names = load_model(MODEL_PATH, _device, MODEL_NAME)
         _model_mtime = current_mtime
 
 
@@ -74,4 +81,4 @@ async def predict(file: UploadFile = File(...)):
     image = Image.open(BytesIO(image_bytes)).convert("RGB")
 
     label, score = predict_image(_model, _class_names, image, _device)
-    return {"label": label, "confidence": score}
+    return {"label": label, "confidence": score, "waste_type": _waste_type(label)}
